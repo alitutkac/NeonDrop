@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
@@ -11,94 +10,116 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI highScoreText;
     public GameObject gameOverPanel;
+    public GameObject pausePanel;
+    public GameObject pauseButton;
 
     [Header("Zorluk / Hız Ayarları")]
     public float baseSpeed = 5f;
     public float maxSpeed = 15f;
     public float acceleration = 0.15f;
-
-    [HideInInspector]
     public float currentObstacleSpeed;
 
-    private float score = 0f;
+    private float scoreCounter = 0f;
+    private int score = 0;
     private int highScore = 0;
     private bool isGameOver = false;
+    private bool isPaused = false;
 
     void Awake()
     {
-        instance = this;
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
     }
 
     void Start()
     {
         Time.timeScale = 1f;
         currentObstacleSpeed = baseSpeed;
+        scoreCounter = 0f;
+        score = 0;
+        isGameOver = false;
+        isPaused = false;
 
-        // Hafızadaki en yüksek skoru çek ve ekrana yaz
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (pausePanel != null) pausePanel.SetActive(false);
+        if (pauseButton != null) pauseButton.SetActive(true);
+
         highScore = PlayerPrefs.GetInt("HighScore", 0);
-        if (highScoreText != null)
-            highScoreText.text = "BEST: " + highScore.ToString();
-
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(false);
+        UpdateScoreUI();
     }
 
     void Update()
     {
-        if (!isGameOver)
+        if (!isGameOver && !isPaused)
         {
-            // Skor artışı
-            score += Time.deltaTime * 10f;
-            if (scoreText != null)
-                scoreText.text = ((int)score).ToString();
-
-            // Hız artışı
+            // Hızlanma
             if (currentObstacleSpeed < maxSpeed)
             {
                 currentObstacleSpeed += acceleration * Time.deltaTime;
             }
+
+            // Sürekli ve seri skor artışı (Saniyede 5 skor hızı)
+            scoreCounter += Time.deltaTime * 5f;
+            int newScore = Mathf.FloorToInt(scoreCounter);
+
+            if (newScore > score)
+            {
+                score = newScore;
+                if (score > highScore)
+                {
+                    highScore = score;
+                    PlayerPrefs.SetInt("HighScore", highScore);
+                }
+                UpdateScoreUI();
+            }
         }
+    }
+
+    public void AddScore(int amount)
+    {
+        if (isGameOver || isPaused) return;
+        score += amount;
+        if (score > highScore)
+        {
+            highScore = score;
+            PlayerPrefs.SetInt("HighScore", highScore);
+        }
+        UpdateScoreUI();
+    }
+
+    void UpdateScoreUI()
+    {
+        if (scoreText != null) scoreText.text = score.ToString();
+        if (highScoreText != null) highScoreText.text = "BEST : " + highScore.ToString();
     }
 
     public void GameOver()
     {
         if (isGameOver) return;
-
         isGameOver = true;
-
-        // Yeni rekor kırıldıysa kaydet
-        if ((int)score > highScore)
-        {
-            highScore = (int)score;
-            PlayerPrefs.SetInt("HighScore", highScore);
-            PlayerPrefs.Save();
-        }
-
-        StartCoroutine(ScreenShakeAndStop());
-    }
-
-    private IEnumerator ScreenShakeAndStop()
-    {
-        Transform camTransform = Camera.main.transform;
-        Vector3 originalPos = camTransform.position;
-        float elapsed = 0f;
-        float duration = 0.2f;
-        float magnitude = 0.3f;
-
-        while (elapsed < duration)
-        {
-            float x = Random.Range(-1f, 1f) * magnitude;
-            float y = Random.Range(-1f, 1f) * magnitude;
-            camTransform.position = new Vector3(originalPos.x + x, originalPos.y + y, originalPos.z);
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
-        camTransform.position = originalPos;
         Time.timeScale = 0f;
 
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        if (pauseButton != null) pauseButton.SetActive(false);
+    }
+
+    public void PauseGame()
+    {
+        if (isGameOver) return;
+        isPaused = true;
+        Time.timeScale = 0f;
+
+        if (pausePanel != null) pausePanel.SetActive(true);
+        if (pauseButton != null) pauseButton.SetActive(false);
+    }
+
+    public void ContinueGame()
+    {
+        isPaused = false;
+        Time.timeScale = 1f;
+
+        if (pausePanel != null) pausePanel.SetActive(false);
+        if (pauseButton != null) pauseButton.SetActive(true);
     }
 
     public void RestartGame()
@@ -107,7 +128,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public void LoadMainMenu()
+    public void QuitToMainMenu()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
