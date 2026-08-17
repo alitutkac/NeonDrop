@@ -104,3 +104,13 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# IDE ve VS Code
+.vscode/
+.vsconfig
+*.csproj
+*.sln
+
+# Unity Logları
+UpgradeLog.htm
+UpgradeLog.xml

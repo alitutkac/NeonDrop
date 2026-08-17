@@ -12,6 +12,10 @@
 
 The primary objective is simple yet demanding: navigate a vibrant glowing orb through an increasingly rapid cascade of neon obstacles. The game tests reaction time and precision with infinite progression and persistent high-score tracking.
 
+<p align="center">
+  <img src=".github/images/gameplay.gif" width="280"/>
+</p>
+
 ### Key Highlights
 * **Dynamic Difficulty Curve:** Obstacle speed scales progressively over time, demanding tighter precision and faster reflexes.
 * **Neon Aesthetic & Post-Processing:** Universal Render Pipeline (URP 2D) combined with custom Bloom and HDR materials for real-time emission effects.
@@ -19,6 +23,17 @@ The primary objective is simple yet demanding: navigate a vibrant glowing orb th
 * **Persistent High Score:** Local storage management utilizing `PlayerPrefs` for real-time best-score comparison.
 * **Modular Game Architecture:** Integrated State Management covering Main Menu navigation, In-Game Pause/Resume states, and Game Over logic.
 * **Production-Ready Build:** Compiled using Android NDK with IL2CPP backend, targeting ARM64 and ARMv7 architectures.
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src=".github/images/main-menu.jpeg" width="200"/>
+  <img src=".github/images/game.jpg" width="200"/>
+  <img src=".github/images/pause-menu.jpg" width="200"/>
+  <img src=".github/images/game-over.jpg" width="200"/>
+</p>
 
 ---
 
